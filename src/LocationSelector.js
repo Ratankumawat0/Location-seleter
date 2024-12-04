@@ -10,40 +10,53 @@ const LocationSelector = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
+  // Fetch all countries on component mount
   useEffect(() => {
-    // Fetch all countries on component mount
     axios
       .get("https://crio-location-selector.onrender.com/countries")
-      .then((response) => setCountries(response.data))
+      .then((response) => {
+        setCountries(response.data);
+      })
       .catch((error) => console.error("Error fetching countries:", error));
   }, []);
 
+  // Fetch states based on selected country
   const handleCountryChange = (country) => {
     setSelectedCountry(country);
     setSelectedState("");
     setSelectedCity("");
     setStates([]);
     setCities([]);
-    // Fetch states for the selected country
-    axios
-      .get(`https://crio-location-selector.onrender.com/country=${country}/states`)
-      .then((response) => setStates(response.data))
-      .catch((error) => console.error("Error fetching states:", error));
+
+    if (country) {
+      axios
+        .get(`https://crio-location-selector.onrender.com/country=${country}/states`)
+        .then((response) => {
+          setStates(response.data);
+        })
+        .catch((error) => console.error("Error fetching states:", error));
+    }
   };
 
+  // Fetch cities based on selected state
   const handleStateChange = (state) => {
     setSelectedState(state);
     setSelectedCity("");
     setCities([]);
-    // Fetch cities for the selected state
-    axios
-      .get(
-        `https://crio-location-selector.onrender.com/country=${selectedCountry}/state=${state}/cities`
-      )
-      .then((response) => setCities(response.data))
-      .catch((error) => console.error("Error fetching cities:", error));
+
+    if (state) {
+      axios
+        .get(
+          `https://crio-location-selector.onrender.com/country=${selectedCountry}/state=${state}/cities`
+        )
+        .then((response) => {
+          setCities(response.data);
+        })
+        .catch((error) => console.error("Error fetching cities:", error));
+    }
   };
 
+  // Update selected city
   const handleCityChange = (city) => {
     setSelectedCity(city);
   };
@@ -51,8 +64,9 @@ const LocationSelector = () => {
   return (
     <div>
       <h1>Location Selector</h1>
+
+      {/* Country Dropdown */}
       <div>
-        {/* Country Dropdown */}
         <select onChange={(e) => handleCountryChange(e.target.value)} value={selectedCountry}>
           <option value="">Select Country</option>
           {countries.map((country) => (
@@ -62,8 +76,9 @@ const LocationSelector = () => {
           ))}
         </select>
       </div>
+
+      {/* State Dropdown */}
       <div>
-        {/* State Dropdown */}
         <select
           onChange={(e) => handleStateChange(e.target.value)}
           value={selectedState}
@@ -77,8 +92,9 @@ const LocationSelector = () => {
           ))}
         </select>
       </div>
+
+      {/* City Dropdown */}
       <div>
-        {/* City Dropdown */}
         <select
           onChange={(e) => handleCityChange(e.target.value)}
           value={selectedCity}
@@ -92,12 +108,15 @@ const LocationSelector = () => {
           ))}
         </select>
       </div>
+
+      {/* Display Selected Location */}
       <div>
-        {/* Display Selected Location */}
-        {selectedCity && selectedState && selectedCountry && (
+        {selectedCity && selectedState && selectedCountry ? (
           <p>
-            You Selected {selectedCity}, {selectedState}, {selectedCountry}
+            You selected {selectedCity}, {selectedState}, {selectedCountry}
           </p>
+        ) : (
+          <p>Please complete your selection.</p>
         )}
       </div>
     </div>
